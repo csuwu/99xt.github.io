@@ -1,5 +1,28 @@
 new Konami("https://www.linkedin.com");
 
+var timeSince = function(date) {
+
+    var seconds = Math.floor((new Date() - date) / 1000);
+    var interval = Math.floor(seconds / 31536000);
+
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) {
+        return date.toLocaleDateString('en-US');
+    }
+    interval = Math.floor(seconds / 3600);
+    if (interval > 1) {
+        return interval + " hours ago";
+    }
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) {
+        return interval + " minutes ago";
+    }
+    if (seconds == 0) {
+        return "just now";
+    }
+    return Math.floor(seconds) + " seconds";
+};
+
 var renderPage = function(data) {
     // hide preloader
     $('#preloader').fadeOut(300, function() {
@@ -117,9 +140,11 @@ var renderPage = function(data) {
             "HTML": "green",
             "XSLT": "brown",
             "Shell": "tomato",
-            "Other": "purple"
-        }
-        return '<span class="label project-label-' + languageMap[language] + '">' + language + '</span>';
+            "Python": "dodgerblue",
+            "Other": "purple",
+        };
+
+        return '<span class="col-lg-1 col-md-1 col-sm-1 col-xs-1 tag label project-label-' + languageMap[language] + '">' + language + '</span>';
     }
 
 
@@ -144,16 +169,18 @@ var renderPage = function(data) {
         }
         var category = getCategory(item.name);
         isotopeData +=
-            '<div class="item ' + category.toLowerCase() + " " + language + ' col-lg-4 border-fade">' +
-            '<h3 class="name">' + item.name + '</h3>' +
+            '<div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 item-container"><div class="item ' + category.toLowerCase() + " " + language + ' col-lg-12 col-md-12 col-sm-12 col-xs-12">' +
+            '<h3 class="col-lg-12 name">' + item.name + '</h3>' +
             '<button class="btn_git btn-with-count js-toggler-target"> ' + '<i class="icon-star"></i>' + item.stargazers_count + ' Stars </button>&nbsp' +
             '<button class="btn_git btn-with-count js-toggler-target">' + '<i class="icon-fork"></i>' + item.forks + ' Forks </button>' +
             '<p class="size hidden">' + item.size + '</p>' +
             '<p class="forks hidden">' + item.forks + '</p>' +
             '<p class="watchers hidden">' + item.watchers_count + '</p>' +
-            '<div class="proj-disc">' + (item.description==null ? "<em>No additional description</em>" : item.description) + '</div>' +
+            '<p class="col-lg-12 proj-disc">' + (item.description==null ? "<em>No additional description</em>" : item.description) + '</p>' +
+            '<div class="col-lg-12 language-tags">' +
             buildLanguageLabel(language) +
-            '</div>';
+            '</div>' +
+            '</div></div>';
         var doc;
         if (item.name in repoToDoc) {
             doc = repoToDoc[item.name];
@@ -166,8 +193,9 @@ var renderPage = function(data) {
     var container = $('#isotope-container');
     container.append(isotopeData);
 
+    //TODO remove in #106
     // initialize Isotope
-    $("#isotope-container").isotope({
+    /*$("#isotope-container").isotope({
         // options
         itemSelector: '.item',
         layoutMode: 'masonry',
@@ -185,7 +213,7 @@ var renderPage = function(data) {
                 return $(elem).find(".name").text();
             }
         }
-    });
+    });*/
 
     // Modals
     $(".item").click(function() {
@@ -237,13 +265,94 @@ var renderPage = function(data) {
             $(this).css('box-shadow', `inset 0 0 0 4px ${color},0 0 1px rgba(0,0,0,0)`);
         });
     });
+};
+
+function renderOrgEvents(data) {
+    data.filter(function (event) {
+        var title = "";
+        var timeStamp = "<span class='time-stamp'>" + timeSince(new Date(event.created_at)) + "</span>";
+        var description = " ";
+        var repo = "<a href='https://github.com/" + event.repo.name + "'>" + event.repo.name + "</a>";
+        var actor = "<a href='https://github.com/"+ event.actor.login +"'>"+
+          "<img class='actor-avatar' src='" + event.actor.avatar_url + "'/>" +
+          event.actor.display_login +
+          "</a>";
+
+        if (event.payload && event.payload.pull_request && event.payload.pull_request.merged) {
+          event.payload.action = "merged";
+        }
+
+        var action = "<span class='action action-" + event.payload.action + "' >" + event.payload.action + "</span>";
+
+        switch (event.type) {
+          case "WatchEvent":
+            title = actor + " " + action + " watching " + repo;
+            description += "";
+            break;
+
+          case "PushEvent":
+            title = actor + " pushed " + event.payload.size + " commits to "+ repo;
+            description += "";
+            description += "<ul class='col-lg-12 commits-list'>";
+
+            for (var i = 0; i < event.payload.size; i++) {
+              var commitObject = event.payload.commits[i];
+              var commit = "<li class='col-lg-12 '><a class='col-lg-12' href='https://github.com/" + event.repo.name + "/commit/" + commitObject.sha + "'>" + commitObject.sha + "</a></li>";
+              description += commit;
+            }
+
+            description += "</ul>";
+            break;
+
+          case "PullRequestEvent":
+            title = actor + " " + action + " a pull request" + repo;
+            description += "<a href='" + event.payload.pull_request.html_url + "'><strong>#" + event.payload.pull_request.number + " " + event.payload.pull_request.title + "</strong></a>";
+            break;
+
+          case "IssueCommentEvent":
+            title = actor + " commented on a " + (event.payload.issue.pull_request ? "pull request" : "issue") + " in " + repo;
+            description += "<a href='" + event.payload.comment.html_url + "'><strong>#" + event.payload.issue.number + " " + event.payload.issue.title + "</strong></a>";
+            break;
+
+          case "ForkEvent":
+            title = actor + " forked " + repo + " to " + "<a href='" + event.payload.forkee.html_url + "'>" + event.payload.forkee.full_name + "</a>";
+            break;
+
+          case "IssuesEvent":
+            title = actor + " " + action + " an issue in " + repo;
+            description += "<a href='" + event.payload.issue.html_url + "'><strong>#" + event.payload.issue.number + " " + event.payload.issue.title + "</strong></a>";
+            break;
+
+          case "PullRequestReviewCommentEvent":
+            title = actor + " reviewed a pull request " + " in " + repo;
+            description += "<a href='" + event.payload.comment.html_url + "'><strong>#" + event.payload.pull_request.number + " " + event.payload.pull_request.title + "</strong></a>";
+            debugger;
+            break;
+        }
+
+        $("#organization-repo-events").append("<div class='col-lg-12 organization-repo-event'>" +
+             "<div class='col-lg-12 activity-title'>" + title + "</div>" +
+            "<div class='col-lg-12 activity-description'>" + description + "</div>" +
+            "<div class='col-lg-12 text-right activity-footer'>" + timeStamp + "</div>"+
+        "</div>");
+    });
 }
 
 $.getJSON(window.location.origin+"/config.json", function(config) {
+    var item = $("#isotope-container").html();
+    for (var i =0; i < 15; i++) {
+      //$("#isotope-container").append(item);
+    }
     $.ajax({
         dataType: 'json',
         url: 'https://api.github.com/orgs/' + config.git_org_name + '/repos?page=1&per_page=100&callback=?',
         success: renderPage
+    });
+
+    $.ajax({
+        dataType: 'json',
+        url: 'https://api.github.com/orgs/' + config.git_org_name + '/events',
+        success: renderOrgEvents
     });
 
     document.title = config.title;

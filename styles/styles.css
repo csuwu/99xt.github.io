@@ -5,11 +5,29 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6{
 .item {
   max-width: 100%;
   min-height: 250px;
-  background-color: #eee;
-  border-style: solid;
-  border-width: 5px;
-  border-color: white;
+  border: 1px solid rgb(242, 242, 242);
+  background-color: rgb(252, 252, 252);
+  border-radius: 3px;
   cursor: pointer;
+}
+
+
+.item {
+  -webkit-transition-duration: .3s;
+  transition-duration: .3s;
+  -webkit-transition-property: box-shadow;
+  transition-property: box-shadow;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.col-lg-4.col-md-6.col-sm-12.col-xs-12.item-container {
+  padding: 5px;
+}
+
+.item:hover {
+  box-shadow: inset 0 0 0 4px #666, 0 0 1px rgba(0,0,0,0);
 }
 
 .item .name {
@@ -71,7 +89,7 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6{
   width: 100%;
   height: 100%;
   overflow: visible;
-  background: #fff url('/images/gears.gif') no-repeat center center;
+  background: #fff url('../images/gears.gif') no-repeat center center;
 }
 
 .btn_git {
@@ -99,19 +117,27 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6{
     
 }
 
-.label{
-    position: absolute;
-    bottom: 12px;
-    font-size: 11px;
-    font-weight: 400;
-    padding: 5px 8px;
-    
+.language-tags {
+  position: absolute;
+  bottom: 0%;
+  padding-bottom: 10px;
+}
+
+.tag {
+  width: initial;
+  min-width: 15px;
+  padding: 5px 8px;
+  max-width: 100%;
+  margin: 2px;
+  border-radius: 3px;
 }
 
 .proj-disc{
-    font-size: 12px;
-    font-weight: 400;
-    padding: 13px 0 0 5px;
+  height: 100px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 13px 0 0 5px;
 }
 
 .success{
@@ -147,6 +173,9 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6{
 .project-label-tomato{
     background: #ff6347;
 }
+.project-label-dodgerblue{
+    background: #1e90ff;
+}
 
 
 @media only screen and (min-width: 768px) {
@@ -155,4 +184,58 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6{
     float: right !important;
   }
 
+}
+
+.actor-avatar {
+  width: 20px;
+  margin-left: 5px;
+  margin-right: 5px;
+  border-radius: 2px;
+}
+
+.organization-repo-event {
+  border-bottom: 1px solid #eeeeee;
+  padding: 3px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.time-stamp {
+  color: rgb(210, 195, 210);
+  font-size: 10px;
+}
+
+.action.action-closed {
+  background: #cb2431;
+  color: white;
+}
+
+.action.action-merged {
+  background: #6f42c1;
+  color: white;
+}
+
+.action.action-opened {
+  background: #2cbe4e;
+  color: white;
+}
+
+.action {
+  margin-left: 5px;
+  margin-right: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 5px;
+}
+
+.commits-list {
+  list-style: none;
+}
+
+.commits-list li a {
+  padding: 0px;
+  font-size: 10px;
+  color: #9E9E9E;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
