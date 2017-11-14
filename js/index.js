@@ -141,7 +141,9 @@ var renderPage = function(data) {
             "XSLT": "brown",
             "Shell": "tomato",
             "Python": "dodgerblue",
+            "TeX": "lightblue",
             "Other": "purple",
+        
         };
 
         return '<span class="col-lg-1 col-md-1 col-sm-1 col-xs-1 tag label project-label-' + languageMap[language] + '">' + language + '</span>';
